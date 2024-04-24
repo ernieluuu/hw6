@@ -5,6 +5,13 @@
 
 using namespace std;
 
+/*
+
+for testing sake, change main function to not have argc, argv
+just create an input string within main and pass it in.
+
+*/
+
 int main(int argc, char* argv[])
 {
     if(argc < 2){

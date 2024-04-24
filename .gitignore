@@ -5,3 +5,10 @@ str-hash-test
 hash-check
 boggle-driver
 hw6_tests/
+.vs/
+hw6.cpp
+hw6.sln
+hw6.vcxproj
+hw6.vcxproj.filters
+hw6.vcxproj.user
+x64/
