@@ -107,7 +107,7 @@ struct MyStringHash {
 	{
 		// Add code here or delete this helper function if you do not want it
 		char c = tolower(letter);
-
+		/*
 		switch (c)
 		{
 		case 'a': return 0;
@@ -147,8 +147,7 @@ struct MyStringHash {
 		case '8': return 34;
 		case '9': return 35;
 		default: return -1;
-		}
-		/*
+		}*/
 		if (isalpha(letter)) // is an alphabetical letter
 		{
 			// Convert uppercase letter to lowercase
@@ -168,7 +167,6 @@ struct MyStringHash {
 			// Return a default value for non-alphanumeric characters
 			return -1;
 		}
-		*/
 	}
 
 	// Code to generate the random R values
