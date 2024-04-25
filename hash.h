@@ -20,107 +20,76 @@ struct MyStringHash {
     HASH_INDEX_T operator()(const std::string& k) const
     {
         // Add your code here
-
-		/*
-		Next you will translate a(sub)string of 6 letters a1 a2 a3 a4 a5 a6 into 
-		an(unsigned long long) 64 - bit integer w[i]
-		(essentially converting from base - 36 to decimal), 
-		via the following mathematical formula 
-
-		If an input word is longer than 6 letters, then you should first do the above 
-		process for the last 6 letters in the word, then repeat the process for each
-		previous group of 6 letters. Recall, you will never receive a word longer 
-		than 28 characters. 
-		The last group may not have 6 letters in which case you would treat it as a 
-		substring of less than 6 characters as described above. Since we have at 
-		most 28 characters this process should result in a sequence of no more than 
-		5 integers: w[0] w[1] w[2] w[3] w[4], where w[4] was produced by the last 
-		6 letters of the word.
-		
-		Store these values in an array (of unsigned long long). 
-		Place zeros in the leading positions of w[i] if the string does not 
-		contain enough characters to make use of those values. So for a string of 
-		12 letters, w[0], w[1], and w[2] would all be 0 and only w[3] and w[4] 
-		would be (potentially) non-zero.
-
-		helloworld
-		-->
-		oworld
-		__hell
-
-		*/
 		int str_len = k.length();
-		unsigned long long vals[28]; // we know that we cannot have more than 28 chars
-		// initializes the vals array
-		for (int i = 0; i < 28; ++i)
-		{
-			vals[i] = 0;
-		}
-		// vector to store the 0-35 digit numbers, you can just push it back into the vector
-		vector<int> numericVals; // can later change this to unsigned 4 bit integers if needed
-		// also could use an unsigned long long numericVals[str_len];
+		unsigned long long wVals[5] = {0,0,0,0,0}; // initializes wVals array
 
+		// vector to store the 0-35 digit numbers, you can just push it back into the vector
+		// also could use an unsigned long long numericVals[str_len];
+		unsigned long long numericVals[str_len];
+
+		// initializes it to all 0
 		for (int i = 0; i < str_len; ++i)
 		{
-			numericVals.push_back(letterDigitToNumber(k[i]));
+			numericVals[i] = 0;
 		}
 
 		int curr_idx = str_len - 1;// start at the last character of the string
-		int curr_arr_idx = 28 - 1; // start at the 27th idx, the last one in the vals array
+		//int curr_arr_idx = 28 - 1; // start at the 27th idx, the last one in the vals array
 									  // if we can't finish the string, the leading values will all be 0.
 
 		int wIdx = 4; // w[i] starts at index 4
 		// 'helloworld' --> (--hell) + (oworld)
 		while (curr_idx >= 0)
 		{
+			unsigned long long result = 0;
 			// where i stands for the digit of the word
 			for (int i = 6; i > 0; --i)
 			{
 				if (i == 6) // a6
 				{
-					vals[curr_arr_idx] = numericVals[curr_idx];
+					result += numericVals[curr_idx];
 				}
 
 				if (i == 5) // 36 * a5
 				{
-					vals[curr_arr_idx] = 36 * numericVals[curr_idx];
+					result += 36 * numericVals[curr_idx];
 				}
 
 				if (i == 4) // 36^2 * a4
 				{
-					vals[curr_arr_idx] = pow(36.0, 2) * numericVals[curr_idx];
+					result += pow(36, 2) * numericVals[curr_idx];
 				}
 
 				if (i == 3) // 36^3 * a3
 				{
-					vals[curr_arr_idx] = pow(36.0, 3) * numericVals[curr_idx];
+					result += pow(36, 3) * numericVals[curr_idx];
 				}
 
 				if (i == 2) // 36^4 * a2
 				{
-					vals[curr_arr_idx] = pow(36.0, 4) * numericVals[curr_idx];
+					result += pow(36, 4) * numericVals[curr_idx];
 				}
 
 				if (i == 1) // 36^5 * a4
 				{
-					vals[curr_arr_idx] = pow(36.0, 5) * numericVals[curr_idx];
-				} 
+					result += pow(36, 5) * numericVals[curr_idx];
+				}
 
-				--curr_arr_idx;
 				--curr_idx;
-				// if longer than string length, break
+
 				if (curr_idx < 0)
 				{
+					wVals[wIdx] = result; 
 					break;
 				}
 			}
+			wVals[wIdx] = 0; // stores result in the current index
+			--wIdx; // moves on to the new index
 		}
 
-		// HASH_INDEX_T to store the end result
+		// conditional statement
 
-
-		// for loop to pass each value in k into letterToDigitNumber
-		// and store the returned HASH_INDEX_T into a ____ data structure.
+		return rValues[0] * wVals[0] + rValues[1] * wVals[1] + rValues[2] * wVals[2] + rValues[3] * wVals[3] + rValues[4] * wVals[4];
 
     }
 
