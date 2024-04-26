@@ -398,6 +398,7 @@ void HashTable<K,V,Prober,Hash,KEqual>::remove(const KeyType& key)
 	}
 	else
 	{
+		// #TODO: FIXME?
 		//throw std::logical_error("Key does not exist");
 	}
 }
@@ -472,10 +473,47 @@ typename HashTable<K,V,Prober,Hash,KEqual>::HashItem* HashTable<K,V,Prober,Hash,
 // To be completed
 template<typename K, typename V, typename Prober, typename Hash, typename KEqual>
 void HashTable<K,V,Prober,Hash,KEqual>::resize()
-{
-	// increment to the next size value
-	// TODO
-    
+{	
+	// store old table, and allocate a new one, then rehash all of the old items into the new table
+
+	std::vector<HashItem*> new_table;
+	//++mIndex_;
+	// int prev_idx = mIndex_ - 1;
+	int curr_idx = mIndex_;
+
+	// call it on mIndex+1 to get the CAPACITIES at the size we need
+	for (int i = 0; i < CAPACITIES[mIndex_+1]; i++)
+	{
+		new_table.push_back(nullptr);
+	}
+
+	// rehash old items into the new table
+	for (int i = 0; i < CAPACITIES[curr_idx]; i++)
+	{
+		if (table_[i] != nullptr && table_[i]->deleted == false)
+		{
+			// ERROR: probe() function calls on new mIndex
+			// FIX: don't increment mIndex until later
+			HASH_INDEX_T new_hash_idx = this->probe(table_[i]->item.first);
+			new_table[new_hash_idx] = table_[i];
+		}
+	}
+
+	// clearing the old table and deallocating memory
+	for (int i = 0; i < CAPACITIES[curr_idx]; i++)
+	{
+		if (table_[i] != nullptr && table_[i]->deleted)
+		{
+			delete table_[i];
+		}
+	}
+
+	// update table_ to point to the new table
+	table_ = new_table;
+	// had to update mIndex_ here
+	// instead of at the beginning
+	// because probe() calls mIndex_ and if we update it then we will get accesses out of range!
+	++mIndex_;
 }
 
 // Almost complete
