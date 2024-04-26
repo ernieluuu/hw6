@@ -35,7 +35,7 @@ struct LinearProber : public Prober<KeyType> {
     {
         // Complete the condition below that indicates failure
         // to find the key or an empty slot
-        if( /* Fill me in */ ) {
+        if(this->numProbes_ >= this->m_) {
             return this->npos; 
         }
         HASH_INDEX_T loc = (this->start_ + this->numProbes_) % this->m_;
@@ -102,9 +102,16 @@ public:
     // To be completed
     HASH_INDEX_T next() 
     {
-
-
-
+		// reached the end
+		if (this->numProbes_ >= this->m_)
+		{
+			return this->npos;
+		}
+		// next hash location
+		HASH_INDEX_T loc = (this->start_ + this->numProbes_) % this->m_;
+		// increment to account for previous probe
+		this->numProbes_++;
+		return loc;
     }
 };
 
@@ -271,6 +278,8 @@ private:
 
     // ADD MORE DATA MEMBERS HERE, AS NECESSARY
 
+	size_t num_items; // can't use unsigned int because return types below are size_t
+	double resizeAlpha; // stores the resize threshold
 };
 
 // ----------------------------------------------------------------------------
@@ -290,31 +299,46 @@ const HASH_INDEX_T HashTable<K,V,Prober,Hash,KEqual>::CAPACITIES[] =
 template<typename K, typename V, typename Prober, typename Hash, typename KEqual>
 HashTable<K,V,Prober,Hash,KEqual>::HashTable(
     double resizeAlpha, const Prober& prober, const Hasher& hash, const KEqual& kequal)
-       :  hash_(hash), kequal_(kequal), prober_(prober)
+       :  hash_(hash), kequal_(kequal), prober_(prober), resizeAlpha(resizeAlpha)
 {
     // Initialize any other data members as necessary
 
+	num_items = 0;
+	// resizeAlpha initialized above
+
+	// initial table has 11 items
+	while (counter < 11)
+	{
+		table_.push_back(nullptr);
+		counter++;
+	}
 }
 
 // To be completed
 template<typename K, typename V, typename Prober, typename Hash, typename KEqual>
 HashTable<K,V,Prober,Hash,KEqual>::~HashTable()
 {
-
+	// iterate through table, deleting all items
+	// since you don't know which indexes have items and which ones don't
+	// we must iterate through the whole table
+	for (int i = 0; i < CAPACITIES[mIndex_]; i++)
+	{
+		delete table_[i];
+	}
 }
 
 // To be completed
 template<typename K, typename V, typename Prober, typename Hash, typename KEqual>
 bool HashTable<K,V,Prober,Hash,KEqual>::empty() const
 {
-
+	return this->num_items == 0;
 }
 
 // To be completed
 template<typename K, typename V, typename Prober, typename Hash, typename KEqual>
 size_t HashTable<K,V,Prober,Hash,KEqual>::size() const
 {
-
+	return num_items;
 }
 
 // To be completed
@@ -322,7 +346,30 @@ template<typename K, typename V, typename Prober, typename Hash, typename KEqual
 void HashTable<K,V,Prober,Hash,KEqual>::insert(const ItemType& p)
 {
 
+	// if exceeded loading factor, resize
+	// loading factor is calculated by num_items / m, where m stands for num indexes
+	if (static_cast<double>(num_items) / CAPACITIES[mIndex_] >= resizeAlpha)
+	{
+		resize();
+	}
 
+	HASH_INDEX_T insert_loc  = probe(p.first);
+	if (insert_loc == npos)
+	{
+		throw std::logic_error("No free location can be found");
+	}
+
+	// If the index is available (nullptr), insert the new item
+	bool free_idx = table_[insert_loc] == nullptr;
+	if (free_idx)
+	{
+		table_[insert_loc] = new HashItem(p);
+		++num_items;
+	}
+	else if (table_[insert_loc]->item.first == p.first)
+	{
+		table_[insert_loc]->item.second = p.second;
+	}
 }
 
 // To be completed
@@ -404,7 +451,7 @@ typename HashTable<K,V,Prober,Hash,KEqual>::HashItem* HashTable<K,V,Prober,Hash,
 template<typename K, typename V, typename Prober, typename Hash, typename KEqual>
 void HashTable<K,V,Prober,Hash,KEqual>::resize()
 {
-
+	// increment to the next size value
     
 }
 
@@ -424,8 +471,10 @@ HASH_INDEX_T HashTable<K,V,Prober,Hash,KEqual>::probe(const KeyType& key) const
         }
         // fill in the condition for this else if statement which should 
         // return 'loc' if the given key exists at this location
-        else if(/* Fill me in */) {
-            return loc;
+        //else if(/* Fill me in */) {
+		else if (!(table_[loc]->deleted) && table_[loc]->item.first == key)
+		{
+		return loc;
         }
         loc = prober_.next();
         totalProbes_++;
