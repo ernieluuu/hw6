@@ -306,11 +306,12 @@ HashTable<K,V,Prober,Hash,KEqual>::HashTable(
 	num_items = 0;
 	// resizeAlpha initialized above
 
+	int count = 0;
 	// initial table has 11 items
-	while (counter < 11)
+	while (count < 11)
 	{
 		table_.push_back(nullptr);
-		counter++;
+		count++;
 	}
 }
 
@@ -379,17 +380,17 @@ void HashTable<K,V,Prober,Hash,KEqual>::remove(const KeyType& key)
 	HASH_INDEX_T loc = probe(key);
 
 	// invalid index
-	if (index == npos)
+	if (loc == npos)
 	{
 		return;
 	}
-	else if (table_[index] == nullptr)
+	else if (table_[loc] == nullptr)
 	{
 		return;
 	}
 	
 	// just set it to true
-	HashItem curr = table_[index];
+	HashItem* curr = table_[loc];
 	if (curr->item.first == key)
 	{
 		curr->deleted = true;
@@ -397,7 +398,7 @@ void HashTable<K,V,Prober,Hash,KEqual>::remove(const KeyType& key)
 	}
 	else
 	{
-		throw std::logical_error("Key does not exist");
+		//throw std::logical_error("Key does not exist");
 	}
 }
 
