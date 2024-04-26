@@ -376,8 +376,29 @@ void HashTable<K,V,Prober,Hash,KEqual>::insert(const ItemType& p)
 template<typename K, typename V, typename Prober, typename Hash, typename KEqual>
 void HashTable<K,V,Prober,Hash,KEqual>::remove(const KeyType& key)
 {
+	HASH_INDEX_T loc = probe(key);
 
-
+	// invalid index
+	if (index == npos)
+	{
+		return;
+	}
+	else if (table_[index] == nullptr)
+	{
+		return;
+	}
+	
+	// just set it to true
+	HashItem curr = table_[index];
+	if (curr->item.first == key)
+	{
+		curr->deleted = true;
+		--num_items;
+	}
+	else
+	{
+		throw std::logical_error("Key does not exist");
+	}
 }
 
 
@@ -452,6 +473,7 @@ template<typename K, typename V, typename Prober, typename Hash, typename KEqual
 void HashTable<K,V,Prober,Hash,KEqual>::resize()
 {
 	// increment to the next size value
+	// TODO
     
 }
 
